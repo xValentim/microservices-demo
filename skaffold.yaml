@@ -41,6 +41,8 @@ build:
     context: src/currencyservice
   - image: cartservice
     context: src/cartservice/src
+  - image: aiassistantservice
+    context: src/aiassistantservice
     docker:
       dockerfile: Dockerfile
   - image: frontend
