@@ -26,3 +26,7 @@ obj/
 pkg/
 release/wi-kubernetes-manifests.yaml
 vendor/
+.env/
+nanobananaservice/.env/
+src/nanobananaservice/.env/
+.env
