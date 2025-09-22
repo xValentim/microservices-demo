@@ -72,12 +72,12 @@ react-product-frontend/
 
 ## 🔌 API Endpoints
 
-O BFF expõe os seguintes endpoints REST:
+O frontend consome os seguintes endpoints da API externa:
 
-- `GET /api/products` - Lista todos os produtos
-- `GET /api/products/:id` - Busca produto por ID
-- `GET /api/search?q=query` - Busca produtos por texto
-- `GET /health` - Health check
+- `GET /products` - Lista todos os produtos
+- `GET /products/{product_id}` - Busca produto por ID
+- `GET /products-name/{name}` - Busca produto por nome
+- Busca local: Filtragem client-side nos dados carregados
 
 ## 🛠️ Scripts Disponíveis
 

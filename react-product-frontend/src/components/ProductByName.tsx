@@ -1,22 +1,17 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { formatPrice } from '../utils/formatters';
 import LoadingSpinner from './LoadingSpinner';
 import ErrorMessage from './ErrorMessage';
-import ImageRemix from './ImageRemix';
-import ImageDescribe from './ImageDescribe';
-import FashionAssistant from './FashionAssistant';
-import { useProduct } from '../hooks/useProducts';
+import { useProductByName } from '../hooks/useProducts';
 
-const ProductDetail: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const { product, loading, error, refetch } = useProduct(id);
-  const [showRemix, setShowRemix] = useState(false);
-  const [showDescribe, setShowDescribe] = useState(false);
-  const [showFashion, setShowFashion] = useState(false);
+const ProductByName: React.FC = () => {
+  const { name } = useParams<{ name: string }>();
+  const decodedName = name ? decodeURIComponent(name) : '';
+  const { product, loading, error, refetch } = useProductByName(decodedName);
 
   if (loading) {
-    return <LoadingSpinner message="Loading product details..." />;
+    return <LoadingSpinner message={`Loading product "${decodedName}"...`} />;
   }
 
   if (error) {
@@ -32,7 +27,7 @@ const ProductDetail: React.FC = () => {
     return (
       <div className="empty-state">
         <h2>Product not found</h2>
-        <p>The requested product could not be found.</p>
+        <p>No product found with the name "{decodedName}".</p>
         <Link to="/" className="btn btn-primary">
           ← Back to Products
         </Link>
@@ -102,59 +97,14 @@ const ProductDetail: React.FC = () => {
             <button className="btn btn-primary btn-large">
               🛒 Add to Cart
             </button>
-            <button
-              className="btn btn-secondary btn-large"
-              onClick={() => setShowRemix(true)}
-            >
-              🎨 Try with AI
-            </button>
-            <button
-              className="btn btn-secondary btn-large"
-              onClick={() => setShowFashion(true)}
-              title="Get personalized fashion advice using this product"
-            >
-              ✨ Fashion AI
-            </button>
-            <button
-              className="btn btn-secondary btn-large"
-              onClick={() => setShowDescribe(true)}
-              title="Generate AI description of this product"
-            >
-              🔍 AI Describe
-            </button>
             <Link to="/" className="btn btn-secondary">
               ← Back to Products
             </Link>
           </div>
         </div>
       </div>
-
-      {/* Modal de Remix */}
-      {showRemix && (
-        <ImageRemix
-          product={product}
-          onClose={() => setShowRemix(false)}
-        />
-      )}
-
-      {/* Modal de Fashion Assistant */}
-      {showFashion && (
-        <FashionAssistant
-          product={product}
-          onClose={() => setShowFashion(false)}
-        />
-      )}
-
-      {/* Modal de Describe */}
-      {showDescribe && (
-        <ImageDescribe
-          defaultType="product"
-          product={product}
-          onClose={() => setShowDescribe(false)}
-        />
-      )}
     </div>
   );
 };
 
-export default ProductDetail;
+export default ProductByName;

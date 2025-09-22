@@ -1,47 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { Product } from '../types/Product';
-import { ProductService } from '../services/productService';
 import { formatPrice, truncateText } from '../utils/formatters';
 import LoadingSpinner from './LoadingSpinner';
 import ErrorMessage from './ErrorMessage';
+import { useProductSearch } from '../hooks/useProducts';
 
 const SearchResults: React.FC = () => {
   const [searchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
 
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { results: products, loading, error, searchProducts } = useProductSearch();
 
   useEffect(() => {
-    const searchProducts = async () => {
-      if (!query.trim()) {
-        setProducts([]);
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setLoading(true);
-        setError(null);
-
-        console.log(`🔍 Searching for products with query: "${query}"`);
-        const data = await ProductService.searchProducts(query);
-
-        console.log(`✅ Found ${data.length} products`);
-        setProducts(data);
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to search products';
-        console.error('❌ Error searching products:', errorMessage);
-        setError(errorMessage);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    searchProducts();
-  }, [query]);
+    if (query.trim()) {
+      searchProducts(query);
+    }
+  }, [query, searchProducts]);
 
   if (!query.trim()) {
     return (
@@ -63,7 +37,7 @@ const SearchResults: React.FC = () => {
     return (
       <ErrorMessage
         message={error}
-        onRetry={() => window.location.reload()}
+        onRetry={() => searchProducts(query)}
       />
     );
   }
@@ -124,7 +98,7 @@ const SearchResults: React.FC = () => {
                   </p>
 
                   <div className="product-price">
-                    {formatPrice(product.priceUsd)}
+                    {formatPrice(product.price)}
                   </div>
 
                   {product.categories && product.categories.length > 0 && (

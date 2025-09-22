@@ -1,11 +1,9 @@
-import { Money } from '../types/Product';
-
-export const formatPrice = (money: Money): string => {
-  const amount = money.units + (money.nanos / 1000000000);
+export const formatPrice = (price: string): string => {
+  const amount = parseFloat(price);
 
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: money.currencyCode || 'USD',
+    currency: 'USD',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(amount);

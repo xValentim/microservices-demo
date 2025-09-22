@@ -1,38 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { Product } from '../types/Product';
-import { ProductService } from '../services/productService';
 import { formatPrice, truncateText } from '../utils/formatters';
 import LoadingSpinner from './LoadingSpinner';
 import ErrorMessage from './ErrorMessage';
+import { useProducts } from '../hooks/useProducts';
 
 const ProductList: React.FC = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        console.log('📦 Fetching products from API...');
-        const data = await ProductService.getAllProducts();
-
-        console.log(`✅ Successfully loaded ${data.length} products`);
-        setProducts(data);
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to load products';
-        console.error('❌ Error loading products:', errorMessage);
-        setError(errorMessage);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, []);
+  const { products, loading, error, refetch } = useProducts();
 
   if (loading) {
     return <LoadingSpinner message="Loading products..." />;
@@ -42,7 +16,7 @@ const ProductList: React.FC = () => {
     return (
       <ErrorMessage
         message={error}
-        onRetry={() => window.location.reload()}
+        onRetry={refetch}
       />
     );
   }
@@ -90,7 +64,7 @@ const ProductList: React.FC = () => {
                 </p>
 
                 <div className="product-price">
-                  {formatPrice(product.priceUsd)}
+                  {formatPrice(product.price)}
                 </div>
 
                 {product.categories && product.categories.length > 0 && (

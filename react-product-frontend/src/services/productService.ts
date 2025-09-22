@@ -1,7 +1,7 @@
 import axios from 'axios';
-import { Product, ProductsResponse, ProductResponse } from '../types/Product';
+import { Product, ProductsApiResponse } from '../types/Product';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://34.61.215.100:8080';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -38,13 +38,10 @@ api.interceptors.response.use(
 export class ProductService {
   static async getAllProducts(): Promise<Product[]> {
     try {
-      const response = await api.get<ProductsResponse>('/products');
+      const response = await api.get<ProductsApiResponse>('/products');
 
-      if (!response.data.success) {
-        throw new Error(response.data.error || 'Failed to fetch products');
-      }
-
-      return response.data.data;
+      // Nova API retorna { products: [...] } diretamente
+      return response.data.products;
     } catch (error) {
       console.error('Error fetching products:', error);
       throw error;
@@ -53,30 +50,36 @@ export class ProductService {
 
   static async getProductById(id: string): Promise<Product> {
     try {
-      const response = await api.get<ProductResponse>(`/products/${id}`);
-
-      if (!response.data.success) {
-        throw new Error(response.data.error || 'Failed to fetch product');
-      }
-
-      return response.data.data;
+      const response = await api.get<Product>(`/products/${id}`);
+      return response.data;
     } catch (error) {
       console.error(`Error fetching product ${id}:`, error);
       throw error;
     }
   }
 
+  static async getProductByName(name: string): Promise<Product> {
+    try {
+      const response = await api.get<Product>(`/products-name/${encodeURIComponent(name)}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching product by name "${name}":`, error);
+      throw error;
+    }
+  }
+
   static async searchProducts(query: string): Promise<Product[]> {
     try {
-      const response = await api.get<ProductsResponse>('/search', {
-        params: { q: query }
-      });
+      // Como a nova API não tem endpoint de busca,
+      // vamos buscar todos e filtrar localmente
+      const products = await this.getAllProducts();
+      const lowercaseQuery = query.toLowerCase();
 
-      if (!response.data.success) {
-        throw new Error(response.data.error || 'Failed to search products');
-      }
-
-      return response.data.data;
+      return products.filter(product =>
+        product.name.toLowerCase().includes(lowercaseQuery) ||
+        product.description.toLowerCase().includes(lowercaseQuery) ||
+        product.categories.some(cat => cat.toLowerCase().includes(lowercaseQuery))
+      );
     } catch (error) {
       console.error(`Error searching products with query "${query}":`, error);
       throw error;
